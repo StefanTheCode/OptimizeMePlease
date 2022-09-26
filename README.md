@@ -1,7 +1,8 @@
 # OptimizeMePlease
 
-## You are probably here because you saw my post on Linkedin.
-## Welcome!
+### Benchmarks
+![image](https://user-images.githubusercontent.com/57834677/192267449-6aca63f8-ea83-4dae-a931-d26c2f90a4b5.png)
+
 
 # Steps
 
