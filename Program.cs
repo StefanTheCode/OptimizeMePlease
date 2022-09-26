@@ -30,7 +30,7 @@ namespace OptimizeMePlease
             //Comment me after first execution, please.
             //IWillPopulateData();
 
-            //BenchmarkRunner.Run<BenchmarkService>();
+            BenchmarkRunner.Run<BenchmarkService>();
         }
 
         public static void IWillPopulateData()

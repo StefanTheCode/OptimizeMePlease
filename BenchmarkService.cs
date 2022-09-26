@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OptimizeMePlease.Context;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace OptimizeMePlease
 {
@@ -86,11 +87,30 @@ namespace OptimizeMePlease
         }
 
         [Benchmark]
-        public List<AuthorDTO> GetAuthors_Optimized()
+        public async Task<List<OptimizedAuthorDTO>> GetAuthors_Optimized()
         {
-            List<AuthorDTO> authors = new List<AuthorDTO>();
+            using var dbContext = new AppDbContext();
 
-            return authors;
+            return await dbContext.Authors
+                                        .AsNoTracking()
+                                        .Where(a => a.Country == "Serbia" && a.Age == 27)
+                                        .OrderByDescending(a => a.BooksCount)
+                                        .Select(a => new OptimizedAuthorDTO
+                                        {
+                                            UserFirstName = a.User.FirstName,
+                                            UserLastName = a.User.LastName,
+                                            UserName = a.User.UserName,
+                                            UserEmail = a.User.Email,
+                                            AuthorAge = a.Age,
+                                            AuthorCountry = a.Country,
+                                            AllBooks = a.Books.Where(b => b.Published.Year < 1900).Select(b => new BookDto
+                                            {
+                                                Name = b.Name,
+                                                PublishedYear = b.Published.Year
+                                            }).ToList()
+                                        })
+                                        .Take(2)
+                                        .ToListAsync();
         }
     }
 }
