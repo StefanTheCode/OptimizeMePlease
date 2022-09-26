@@ -25,17 +25,22 @@ namespace OptimizeMePlease
         {
             //Debugging 
             BenchmarkService benchmarkService = new BenchmarkService();
-            benchmarkService.GetAuthors();
+            // Original query
+            var nonOpt = benchmarkService.GetAuthors();
+            // Optimized query without uchanging the dto
+            var Opt = benchmarkService.GetAuthors_Optimized();
+            // Optimized query with changing DTOs
+            var Opt_Meaningful = benchmarkService.GetAuthors_Optimized_Meaningful();
 
             //Comment me after first execution, please.
             //IWillPopulateData();
 
-            //BenchmarkRunner.Run<BenchmarkService>();
+            BenchmarkRunner.Run<BenchmarkService>();
         }
 
         public static void IWillPopulateData()
         {
-            string sqlConnectionString = @"Server=localhost;Database=OptimizeMePlease;Trusted_Connection=True;Integrated Security=true;MultipleActiveResultSets=true";
+            string sqlConnectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=master;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Database=OptimizeMePlease";
 
             string workingDirectory = Environment.CurrentDirectory;
             string path = Path.Combine(Directory.GetParent(workingDirectory).Parent.Parent.FullName, @"script.sql");
