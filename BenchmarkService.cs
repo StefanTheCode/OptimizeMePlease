@@ -119,7 +119,8 @@ namespace OptimizeMePlease
                             Name = y.Name,
                             Published = y.Published,
                             ISBN = y.ISBN,
-                            PublisherName = y.Publisher.Name
+                            PublisherName = y.Publisher.Name,
+                            PublishedYear = y.Published.Year
                         }).ToList(),
                     AuthorAge = x.Age,
                     AuthorCountry = x.Country,
