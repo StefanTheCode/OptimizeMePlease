@@ -117,9 +117,9 @@ namespace OptimizeMePlease
                                         })
                                         .Where(x => x.AuthorCountry == "Serbia" && x.AuthorAge == 27);
 
-            var orderedAuthors = authors.OrderByDescending(x => x.BooksCount).Take(2).ToList();
+            var orderedAuthors = authors.OrderByDescending(x => x.BooksCount).Take(2);
 
-            return orderedAuthors;
+            return orderedAuthors.ToList();
         }
     }
 }
