@@ -14,7 +14,7 @@ namespace OptimizeMePlease
         }
 
         /// <summary>
-        /// Get top 2 Authors (FirstName, LastName, UserName, Email, Age, Country) 
+        /// Get top 2 Authors (FirstName, LastName, UserName, Email, Age, Country)
         /// from country Serbia aged 27, with the highest BooksCount
         /// and all his/her books (Book Name/Title and Publishment Year) published before 1900
         /// </summary>
@@ -88,9 +88,40 @@ namespace OptimizeMePlease
         [Benchmark]
         public List<AuthorDTO> GetAuthors_Optimized()
         {
-            List<AuthorDTO> authors = new List<AuthorDTO>();
+            using var dbContext = new AppDbContext();
 
-            return authors;
+            var authors = dbContext.Authors.AsNoTracking()
+                                        .Select(x => new AuthorDTO
+                                        {
+                                            UserCreated = x.User.Created,
+                                            UserEmailConfirmed = x.User.EmailConfirmed,
+                                            UserFirstName = x.User.FirstName,
+                                            UserLastActivity = x.User.LastActivity,
+                                            UserLastName = x.User.LastName,
+                                            UserEmail = x.User.Email,
+                                            UserName = x.User.UserName,
+                                            UserId = x.User.Id,
+                                            RoleId = x.User.UserRoles.FirstOrDefault(y => y.UserId == x.UserId).RoleId,
+                                            BooksCount = x.BooksCount,
+                                            AllBooks = x.Books.Select(y => new BookDto
+                                            {
+                                                Id = y.Id,
+                                                Name = y.Name,
+                                                Published = y.Published,
+                                                ISBN = y.ISBN,
+                                                PublisherName = y.Publisher.Name,
+                                                PublishedYear = y.Published.Year
+                                            }).Where(b => b.Published.Year < 1900).ToList(),
+                                            AuthorAge = x.Age,
+                                            AuthorCountry = x.Country,
+                                            AuthorNickName = x.NickName,
+                                            Id = x.Id
+                                        })
+                                        .Where(x => x.AuthorCountry == "Serbia" && x.AuthorAge == 27);
+
+            var orderedAuthors = authors.OrderByDescending(x => x.BooksCount).Take(2).ToList();
+
+            return orderedAuthors;
         }
     }
 }
