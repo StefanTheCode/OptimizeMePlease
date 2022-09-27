@@ -30,7 +30,7 @@ namespace OptimizeMePlease
         public string UserEmail { get; set; }
         public string UserName { get; set; }
         public int BooksCount { get; set; }
-        public IEnumerable<BookDto> AllBooks { get; set; }
+        public IEnumerable<BookDto_Optimized> AllBooks { get; set; }
         public int AuthorAge { get; set; }
         public string AuthorCountry { get; set; }
     }

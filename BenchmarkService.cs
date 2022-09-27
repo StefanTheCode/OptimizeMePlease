@@ -102,13 +102,10 @@ namespace OptimizeMePlease
                     UserEmail = x.User.Email,
                     UserName = x.User.UserName,
                     BooksCount = x.BooksCount,
-                    AllBooks = x.Books.Where(b => b.Published.Year < 1900).Select(y => new BookDto
+                    AllBooks = x.Books.Where(b => b.Published.Year < 1900).Select(y => new BookDto_Optimized
                     {
-                        Id = y.Id,
                         Name = y.Name,
-                        Published = y.Published,
-                        ISBN = y.ISBN,
-                        PublisherName = y.Publisher.Name
+                        Published = y.Published
                     }),
                     AuthorAge = x.Age,
                     AuthorCountry = x.Country,
