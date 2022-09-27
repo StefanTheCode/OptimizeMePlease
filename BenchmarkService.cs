@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System;
+using BenchmarkDotNet.Attributes;
 using Microsoft.EntityFrameworkCore;
 using OptimizeMePlease.Context;
 using System.Collections.Generic;
@@ -88,9 +89,45 @@ namespace OptimizeMePlease
         [Benchmark]
         public List<AuthorDTO> GetAuthors_Optimized()
         {
-            List<AuthorDTO> authors = new List<AuthorDTO>();
+            using var dbContext = new AppDbContext();
 
-            return authors;
+            var bookCutoffDate = new DateTime(1900, 1, 1);
+
+            var youngSerbianAuthorQuery = dbContext
+                .Authors
+                .Where(x => x.Country == "Serbia" && x.Age == 27)
+                .OrderByDescending(x => x.BooksCount)
+                .Take(2)
+                .Select(x => new AuthorDTO
+                {
+                    UserCreated = x.User.Created,
+                    UserEmailConfirmed = x.User.EmailConfirmed,
+                    UserFirstName = x.User.FirstName,
+                    UserLastActivity = x.User.LastActivity,
+                    UserLastName = x.User.LastName,
+                    UserEmail = x.User.Email,
+                    UserName = x.User.UserName,
+                    UserId = x.User.Id,
+                    RoleId = dbContext.UserRoles.Where(y => y.UserId == x.UserId).Select(u => u.RoleId).FirstOrDefault(),
+                    BooksCount = x.BooksCount,
+                    AllBooks = dbContext.Books
+                        .Where(b => b.Published < bookCutoffDate)
+                        .Where(b => b.AuthorId == x.Id)
+                        .Select(y => new BookDto
+                        {
+                            Id = y.Id,
+                            Name = y.Name,
+                            Published = y.Published,
+                            ISBN = y.ISBN,
+                            PublisherName = y.Publisher.Name
+                        }).ToList(),
+                    AuthorAge = x.Age,
+                    AuthorCountry = x.Country,
+                    AuthorNickName = x.NickName,
+                    Id = x.Id
+                });
+
+            return youngSerbianAuthorQuery.ToList();
         }
     }
 }
