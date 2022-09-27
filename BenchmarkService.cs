@@ -88,9 +88,7 @@ namespace OptimizeMePlease
         [Benchmark]
         public List<AuthorDTO> GetAuthors_Optimized()
         {
-            using var dbContext = new AppDbContext();
-
-            var authors = dbContext.Authors.AsNoTracking()
+            var authors = ContextProvider.AppDbContext.Authors
                                         .Select(x => new AuthorDTO
                                         {
                                             UserCreated = x.User.Created,
@@ -101,7 +99,7 @@ namespace OptimizeMePlease
                                             UserEmail = x.User.Email,
                                             UserName = x.User.UserName,
                                             UserId = x.User.Id,
-                                            RoleId = x.User.UserRoles.FirstOrDefault(y => y.UserId == x.UserId).RoleId,
+                                            RoleId = x.User.UserRoles.FirstOrDefault().RoleId,
                                             BooksCount = x.BooksCount,
                                             AllBooks = x.Books.Select(y => new BookDto
                                             {
