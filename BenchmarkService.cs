@@ -85,8 +85,8 @@ namespace OptimizeMePlease
             return finalAuthors;
         }
 
- [Benchmark]
-        public object GetAuthors_Optimized()
+        [Benchmark]
+        public AuthorDTO[] GetAuthors_Optimized()
         {
             using var dbContext = new AppDbContext();
           
