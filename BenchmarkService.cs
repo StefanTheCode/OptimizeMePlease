@@ -1,6 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Microsoft.EntityFrameworkCore;
 using OptimizeMePlease.Context;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,9 +11,13 @@ namespace OptimizeMePlease
     [MemoryDiagnoser]
     public class BenchmarkService
     {
-        private readonly AppDbContext _dbContext;
-
+        private AppDbContext _dbContext;
         public BenchmarkService()
+        {
+        }
+
+        [GlobalSetup]
+        public void GlobalSetup()
         {
             _dbContext = new AppDbContext();
         }
@@ -93,7 +98,8 @@ namespace OptimizeMePlease
         public async Task<List<OptimizedAuthorDTO>> GetAuthors_Optimized()
         {
             string authorCountryFilter = "Serbia";
-            int authorAgeFilter = 27, authorYearFilter = 1900;
+            int authorAgeFilter = 27;
+            DateTime authorDateFilter = new DateTime(1900, 1, 1);
 
             return await _dbContext.Authors
                                         .AsNoTracking()
@@ -107,7 +113,7 @@ namespace OptimizeMePlease
                                             UserEmail = a.User.Email,
                                             AuthorAge = a.Age,
                                             AuthorCountry = a.Country,
-                                            AllBooks = a.Books.Where(b => b.Published.Year < authorYearFilter).Select(b => new BookDto
+                                            AllBooks = a.Books.Where(b => b.Published < authorDateFilter).Select(b => new BookDto
                                             {
                                                 Name = b.Name,
                                                 PublishedYear = b.Published.Year
