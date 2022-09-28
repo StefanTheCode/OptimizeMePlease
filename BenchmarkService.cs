@@ -10,8 +10,11 @@ namespace OptimizeMePlease
     [MemoryDiagnoser]
     public class BenchmarkService
     {
+        private readonly AppDbContext _dbContext;
+
         public BenchmarkService()
         {
+            _dbContext = new AppDbContext();
         }
 
         /// <summary>
@@ -89,11 +92,12 @@ namespace OptimizeMePlease
         [Benchmark]
         public async Task<List<OptimizedAuthorDTO>> GetAuthors_Optimized()
         {
-            using var dbContext = new AppDbContext();
+            string authorCountryFilter = "Serbia";
+            int authorAgeFilter = 27, authorYearFilter = 1900;
 
-            return await dbContext.Authors
+            return await _dbContext.Authors
                                         .AsNoTracking()
-                                        .Where(a => a.Country == "Serbia" && a.Age == 27)
+                                        .Where(a => a.Country == authorCountryFilter && a.Age == authorAgeFilter)
                                         .OrderByDescending(a => a.BooksCount)
                                         .Select(a => new OptimizedAuthorDTO
                                         {
@@ -103,7 +107,7 @@ namespace OptimizeMePlease
                                             UserEmail = a.User.Email,
                                             AuthorAge = a.Age,
                                             AuthorCountry = a.Country,
-                                            AllBooks = a.Books.Where(b => b.Published.Year < 1900).Select(b => new BookDto
+                                            AllBooks = a.Books.Where(b => b.Published.Year < authorYearFilter).Select(b => new BookDto
                                             {
                                                 Name = b.Name,
                                                 PublishedYear = b.Published.Year
