@@ -125,11 +125,7 @@ namespace OptimizeMePlease
                                             Id = x.Id
                                         }).Take(2).ToList();
             
-
             return authors;
-            //List<AuthorDTO> authors = new List<AuthorDTO>();
-
-            //return authors;
         }
     }
 }
