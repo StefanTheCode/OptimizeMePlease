@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System;
+using BenchmarkDotNet.Attributes;
 using Microsoft.EntityFrameworkCore;
 using OptimizeMePlease.Context;
 using System.Collections.Generic;
@@ -90,7 +91,10 @@ namespace OptimizeMePlease
         {
             using var dbContext = new AppDbContext();
 
+            var date = new DateTime(1900, 1, 1);
+
             return dbContext.Authors
+                .Include(x => x.Books.Where(b => b.Published < date))
                 .AsNoTracking()
                 .Where(x => x.Country == "Serbia" && x.Age == 27)
                 .OrderByDescending(x => x.BooksCount)
@@ -102,7 +106,7 @@ namespace OptimizeMePlease
                     UserEmail = x.User.Email,
                     UserName = x.User.UserName,
                     BooksCount = x.BooksCount,
-                    AllBooks = x.Books.Where(b => b.Published.Year < 1900).Select(y => new BookDto_Optimized
+                    AllBooks = x.Books.Select(y => new BookDto_Optimized
                     {
                         Name = y.Name,
                         Published = y.Published
