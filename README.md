@@ -1,7 +1,7 @@
 # OptimizeMePlease
 
-### Benchmarks
-![image](https://user-images.githubusercontent.com/57834677/192267449-6aca63f8-ea83-4dae-a931-d26c2f90a4b5.png)
+### Benchmark Result
+![benchmark](https://user-images.githubusercontent.com/57834677/192765626-174e2c57-f924-4868-b182-857473cef340.PNG)
 
 
 # Steps
