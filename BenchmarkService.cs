@@ -92,36 +92,23 @@ namespace OptimizeMePlease
             var authors = dbContext.Authors
                                         .AsNoTracking()
                                         .Include(x => x.User)
-                                        .ThenInclude(x => x.UserRoles)
-                                        .ThenInclude(x => x.Role)
                                         .Include(x => x.Books)
                                         .ThenInclude(x => x.Publisher)
                                         .Where(x => x.Country == "Serbia" && x.Age == 27)
                                         .OrderByDescending(x => x.BooksCount)
                                         .Select(x => new AuthorDTO
                                         {
-                                            UserCreated = x.User.Created,
-                                            UserEmailConfirmed = x.User.EmailConfirmed,
                                             UserFirstName = x.User.FirstName,
-                                            UserLastActivity = x.User.LastActivity,
                                             UserLastName = x.User.LastName,
-                                            UserEmail = x.User.Email,
                                             UserName = x.User.UserName,
-                                            UserId = x.User.Id,
-                                            RoleId = x.User.UserRoles.FirstOrDefault(y => y.UserId == x.UserId).RoleId,
-                                            BooksCount = x.BooksCount,
-                                            AllBooks = x.Books.Select(y => new BookDto
-                                            {
-                                                Id = y.Id,
-                                                Name = y.Name,
-                                                Published = y.Published,
-                                                ISBN = y.ISBN,
-                                                PublisherName = y.Publisher.Name,
-                                                PublishedYear = y.Published.Year < 1900 ? y.Published.Year : 0
-                                            }).ToList(),
+                                            UserEmail = x.User.Email,
                                             AuthorAge = x.Age,
                                             AuthorCountry = x.Country,
-                                            AuthorNickName = x.NickName,
+                                            AllBooks = x.Books.Select(y => new BookDto
+                                            {
+                                                Name = y.Name,
+                                                PublishedYear = y.Published.Year < 1900 ? y.Published.Year : 0
+                                            }).ToList(),
                                             Id = x.Id
                                         }).Take(2).ToList();
             
