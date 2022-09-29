@@ -2,7 +2,6 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
-using OptimizeMePlease.Context;
 using System;
 using System.IO;
 
@@ -26,7 +25,7 @@ namespace OptimizeMePlease
         {
             //Debugging 
             BenchmarkService benchmarkService = new BenchmarkService();
-            benchmarkService.GetAuthors();
+            //benchmarkService.GetAuthors();
 
             //Comment me after first execution, please.
             //IWillPopulateData();

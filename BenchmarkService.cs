@@ -99,7 +99,7 @@ namespace OptimizeMePlease
         public async Task<List<OptimizedAuthorDTO>> GetAuthors_Optimized()
         {
             string authorCountryFilter = "Serbia";
-            int authorAgeFilter = 27;
+            int authorAgeFilter = 27, authorsCount = 2;
             DateTime authorDateFilter = new DateTime(1900, 1, 1);
 
             return await _dbContext.Authors
@@ -120,7 +120,7 @@ namespace OptimizeMePlease
                                                 PublishedYear = b.Published.Year
                                             }).ToList()
                                         })
-                                        .Take(2)
+                                        .Take(authorsCount)
                                         .ToListAsync();
         }
     }
