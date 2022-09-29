@@ -5,9 +5,10 @@ namespace OptimizeMePlease.Context
 {
     public class AppDbContext : DbContext
     {
+        public static readonly string sqlConnectionString = @"Server=.;Database=OptimizeMePlease;Trusted_Connection=True;Integrated Security=true;MultipleActiveResultSets=true";
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            options.UseSqlServer("Server=localhost;Database=OptimizeMePlease;Trusted_Connection=True;Integrated Security=true;MultipleActiveResultSets=true");
+            options.UseSqlServer(sqlConnectionString);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
