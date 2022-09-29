@@ -17,9 +17,20 @@ namespace OptimizeMePlease
         public int Id { get; set; }
         public int RoleId { get; set; }
         public int BooksCount { get; set; }
-        public List<BookDto> AllBooks { get; set; }
+        public IEnumerable<BookDto> AllBooks { get; set; }
         public int AuthorAge { get; set; }
         public string AuthorCountry { get; set; }
         public string AuthorNickName { get; set; }
+    }
+
+    public sealed class AuthorDTO_Optimized
+    {
+        public string UserFirstName { get; set; }
+        public string UserLastName { get; set; }
+        public string UserEmail { get; set; }
+        public string UserName { get; set; }
+        public int AuthorAge { get; set; }
+        public string AuthorCountry { get; set; }
+        public IEnumerable<BookDTO_Optimized> AllBooks { get; set; }
     }
 }

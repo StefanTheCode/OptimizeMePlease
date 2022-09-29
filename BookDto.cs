@@ -11,4 +11,10 @@ namespace OptimizeMePlease
         public string PublisherName { get; set; }
         public string ISBN { get; set; }
     }
+
+    public sealed class BookDTO_Optimized
+    {
+        public string Name { get; set; }
+        public DateTime Published { get; set; }
+    }
 }

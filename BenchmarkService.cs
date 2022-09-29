@@ -1,14 +1,20 @@
-﻿using BenchmarkDotNet.Attributes;
-using Microsoft.EntityFrameworkCore;
-using OptimizeMePlease.Context;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using BenchmarkDotNet.Attributes;
+
+using Microsoft.EntityFrameworkCore;
+
+using OptimizeMePlease.Context;
 
 namespace OptimizeMePlease
 {
     [MemoryDiagnoser]
     public class BenchmarkService
     {
+        private readonly DateTime _publishedDate = new(1900, 1, 1);
+
         public BenchmarkService()
         {
         }
@@ -19,7 +25,7 @@ namespace OptimizeMePlease
         /// and all his/her books (Book Name/Title and Publishment Year) published before 1900
         /// </summary>
         /// <returns></returns>
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public List<AuthorDTO> GetAuthors()
         {
             using var dbContext = new AppDbContext();
@@ -86,11 +92,33 @@ namespace OptimizeMePlease
         }
 
         [Benchmark]
-        public List<AuthorDTO> GetAuthors_Optimized()
+        public List<AuthorDTO_Optimized> GetAuthors_Optimized()
         {
-            List<AuthorDTO> authors = new List<AuthorDTO>();
+            using var dbContext = new AppDbContext();
 
-            return authors;
+            var authors = dbContext.Authors
+                .Include(x => x.Books.Where(b => b.Published < _publishedDate))
+                .AsNoTracking()
+                .Where(x => x.Country == "Serbia" && x.Age == 27)
+                .OrderByDescending(x => x.BooksCount)
+                .Take(2)
+                .Select(x => new AuthorDTO_Optimized
+                {
+                    UserFirstName = x.User.FirstName,
+                    UserLastName = x.User.LastName,
+                    UserName = x.User.UserName,
+                    UserEmail = x.User.Email,
+                    AuthorAge = x.Age,
+                    AuthorCountry = x.Country,
+                    AllBooks = x.Books
+                        .Select(y => new BookDTO_Optimized
+                        {
+                            Name = y.Name,
+                            Published = y.Published
+                        })
+                });
+
+            return authors.ToList();
         }
     }
 }
