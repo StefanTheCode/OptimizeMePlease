@@ -104,12 +104,11 @@ namespace OptimizeMePlease
                                             UserEmail = x.User.Email,
                                             AuthorAge = x.Age,
                                             AuthorCountry = x.Country,
-                                            AllBooks = x.Books.Select(y => new BookDto
+                                            AllBooks = x.Books.Where(b => b.Published.Year < 1900).Select(y => new BookDto
                                             {
                                                 Name = y.Name,
-                                                PublishedYear = y.Published.Year < 1900 ? y.Published.Year : 0
+                                                PublishedYear = y.Published.Year
                                             }).ToList(),
-                                            Id = x.Id
                                         }).Take(2).ToList();
             
             return authors;
