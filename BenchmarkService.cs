@@ -14,6 +14,7 @@ namespace OptimizeMePlease
         private AppDbContext _dbContext;
         public BenchmarkService()
         {
+            _dbContext = new AppDbContext();
         }
 
         [GlobalSetup]
@@ -113,7 +114,7 @@ namespace OptimizeMePlease
                                             UserEmail = a.User.Email,
                                             AuthorAge = a.Age,
                                             AuthorCountry = a.Country,
-                                            AllBooks = a.Books.Where(b => b.Published < authorDateFilter).Select(b => new BookDto
+                                            AllBooks = a.Books.Where(b => EF.Functions.DateDiffYear(b.Published, authorDateFilter) > 0).Select(b => new BookDto
                                             {
                                                 Name = b.Name,
                                                 PublishedYear = b.Published.Year
