@@ -1,6 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Microsoft.EntityFrameworkCore;
 using OptimizeMePlease.Context;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -86,11 +87,36 @@ namespace OptimizeMePlease
         }
 
         [Benchmark]
-        public List<AuthorDTO> GetAuthors_Optimized()
+        public List<MyAuthorDTO> GetAuthors_Optimized()
         {
-            List<AuthorDTO> authors = new List<AuthorDTO>();
+            using var context = new AppDbContext();
+            var date = new DateTime(1900, 1, 1);
+
+            var authors = context.Authors
+                .Include(b => b.Books.Where(by => by.Published < date))
+                .AsNoTracking()
+                .Where(a => a.Country == "Serbia" && a.Age == 27)
+                .OrderByDescending(a => a.BooksCount)
+                .Select(author => new MyAuthorDTO
+                {
+
+                    UserFirstName = author.User.FirstName,
+                    UserLastName = author.User.LastName,
+                    UserEmail = author.User.Email,
+                    UserName = author.User.UserName,
+                    AuthorAge = author.Age,
+                    AuthorCountry = author.Country,
+                    AllBooks = author.Books.Select(y => new MyBookDTO
+                    {
+                        Name = y.Name,
+                        PublishedYear = y.Published.Year
+
+                    })
+                }).Take(2).ToList();
+
 
             return authors;
         }
     }
 }
+
