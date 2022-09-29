@@ -11,16 +11,8 @@ namespace OptimizeMePlease
     [MemoryDiagnoser]
     public class BenchmarkService
     {
-        private AppDbContext _dbContext;
         public BenchmarkService()
         {
-            _dbContext = new AppDbContext();
-        }
-
-        [GlobalSetup]
-        public void GlobalSetup()
-        {
-            _dbContext = new AppDbContext();
         }
 
         /// <summary>
@@ -98,29 +90,29 @@ namespace OptimizeMePlease
         [Benchmark]
         public async Task<List<OptimizedAuthorDTO>> GetAuthors_Optimized()
         {
-            string authorCountryFilter = "Serbia";
-            int authorAgeFilter = 27, authorsCount = 2;
+            using var dbContext = new AppDbContext();
+
             DateTime authorDateFilter = new DateTime(1900, 1, 1);
 
-            return await _dbContext.Authors
+            return await dbContext.Authors
                                         .AsNoTracking()
-                                        .Where(a => a.Country == authorCountryFilter && a.Age == authorAgeFilter)
+                                        .Where(a => a.Country == "Serbia" && a.Age == 27)
                                         .OrderByDescending(a => a.BooksCount)
+                                        .Take(2)
                                         .Select(a => new OptimizedAuthorDTO
                                         {
-                                            UserFirstName = a.User.FirstName,
-                                            UserLastName = a.User.LastName,
+                                            FirstName = a.User.FirstName,
+                                            LastName = a.User.LastName,
                                             UserName = a.User.UserName,
-                                            UserEmail = a.User.Email,
-                                            AuthorAge = a.Age,
-                                            AuthorCountry = a.Country,
-                                            AllBooks = a.Books.Where(b => b.Published < authorDateFilter).Select(b => new BookDto
+                                            Email = a.User.Email,
+                                            Age = a.Age,
+                                            Country = a.Country,
+                                            Books = a.Books.Where(b => b.Published < authorDateFilter).Select(b => new OptimizedBookDto
                                             {
                                                 Name = b.Name,
                                                 PublishedYear = b.Published.Year
-                                            }).ToList()
+                                            })
                                         })
-                                        .Take(authorsCount)
                                         .ToListAsync();
         }
     }

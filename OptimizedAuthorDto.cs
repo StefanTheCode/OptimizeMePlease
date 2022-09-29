@@ -4,12 +4,12 @@ namespace OptimizeMePlease
 {
     public class OptimizedAuthorDTO
     {
-        public string UserFirstName { get; set; }
-        public string UserLastName { get; set; }
-        public string UserEmail { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
         public string UserName { get; set; }
-        public int AuthorAge { get; set; }
-        public string AuthorCountry { get; set; }
-        public List<BookDto> AllBooks { get; set; }
+        public int Age { get; set; }
+        public string Country { get; set; }
+        public IEnumerable<OptimizedBookDto> Books { get; set; }
     }
 }
