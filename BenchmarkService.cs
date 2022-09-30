@@ -88,34 +88,73 @@ namespace OptimizeMePlease
         [Benchmark]
         public List<AuthorDTO> GetAuthors_Optimized()
         {
-            var authors = ContextProvider.AppDbContext.Authors
-                                        .Select(x => new AuthorDTO
-                                        {
-                                            UserCreated = x.User.Created,
-                                            UserEmailConfirmed = x.User.EmailConfirmed,
-                                            UserFirstName = x.User.FirstName,
-                                            UserLastActivity = x.User.LastActivity,
-                                            UserLastName = x.User.LastName,
-                                            UserEmail = x.User.Email,
-                                            UserName = x.User.UserName,
-                                            UserId = x.User.Id,
-                                            RoleId = x.User.UserRoles.FirstOrDefault().RoleId,
-                                            BooksCount = x.BooksCount,
-                                            AllBooks = x.Books.Select(y => new BookDto
-                                            {
-                                                Id = y.Id,
-                                                Name = y.Name,
-                                                Published = y.Published,
-                                                ISBN = y.ISBN,
-                                                PublisherName = y.Publisher.Name,
-                                                PublishedYear = y.Published.Year
-                                            }).Where(b => b.Published.Year < 1900).ToList(),
-                                            AuthorAge = x.Age,
-                                            AuthorCountry = x.Country,
-                                            AuthorNickName = x.NickName,
-                                            Id = x.Id
-                                        })
-                                        .Where(x => x.AuthorCountry == "Serbia" && x.AuthorAge == 27);
+            var authors =
+                ContextProvider.AppDbContext.Authors
+                    .Select(x => new AuthorDTO
+                    {
+                        UserCreated = x.User.Created,
+                        UserEmailConfirmed = x.User.EmailConfirmed,
+                        UserFirstName = x.User.FirstName,
+                        UserLastActivity = x.User.LastActivity,
+                        UserLastName = x.User.LastName,
+                        UserEmail = x.User.Email,
+                        UserName = x.User.UserName,
+                        UserId = x.User.Id,
+                        RoleId = x.User.UserRoles.FirstOrDefault().RoleId,
+                        BooksCount = x.BooksCount,
+                        AllBooks = x.Books.Select(y => new BookDto
+                        {
+                            Id = y.Id,
+                            Name = y.Name,
+                            Published = y.Published,
+                            ISBN = y.ISBN,
+                            PublisherName = y.Publisher.Name,
+                            PublishedYear = y.Published.Year
+                        }).Where(b => b.Published.Year < 1900).ToList(),
+                        AuthorAge = x.Age,
+                        AuthorCountry = x.Country,
+                        AuthorNickName = x.NickName,
+                        Id = x.Id
+                    })
+                    .Where(x => x.AuthorCountry == "Serbia" && x.AuthorAge == 27);
+
+            var orderedAuthors = authors.OrderByDescending(x => x.BooksCount).Take(2);
+
+            return orderedAuthors.ToList();
+        }
+
+        [Benchmark]
+        public List<AuthorDTO> GetAuthors_Optimized_Indexed()
+        {
+            var authors =
+                IndexedContextProvider.AppDbContext.Authors
+                    .Select(x => new AuthorDTO
+                    {
+                        UserCreated = x.User.Created,
+                        UserEmailConfirmed = x.User.EmailConfirmed,
+                        UserFirstName = x.User.FirstName,
+                        UserLastActivity = x.User.LastActivity,
+                        UserLastName = x.User.LastName,
+                        UserEmail = x.User.Email,
+                        UserName = x.User.UserName,
+                        UserId = x.User.Id,
+                        RoleId = x.User.UserRoles.FirstOrDefault().RoleId,
+                        BooksCount = x.BooksCount,
+                        AllBooks = x.Books.Select(y => new BookDto
+                        {
+                            Id = y.Id,
+                            Name = y.Name,
+                            Published = y.Published,
+                            ISBN = y.ISBN,
+                            PublisherName = y.Publisher.Name,
+                            PublishedYear = y.Published.Year
+                        }).Where(b => b.Published.Year < 1900).ToList(),
+                        AuthorAge = x.Age,
+                        AuthorCountry = x.Country,
+                        AuthorNickName = x.NickName,
+                        Id = x.Id
+                    })
+                    .Where(x => x.AuthorCountry == "Serbia" && x.AuthorAge == 27);
 
             var orderedAuthors = authors.OrderByDescending(x => x.BooksCount).Take(2);
 

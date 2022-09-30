@@ -28,8 +28,10 @@ namespace OptimizeMePlease
             BenchmarkService benchmarkService = new BenchmarkService();
             var authors = benchmarkService.GetAuthors();
             var optimizedAuthors = benchmarkService.GetAuthors_Optimized();
+            var indexedAuthors = benchmarkService.GetAuthors_Optimized_Indexed();
 
             authors.ShouldDeepEqual(optimizedAuthors);
+            authors.ShouldDeepEqual(indexedAuthors);
 
             //Comment me after first execution, please.
             //IWillPopulateData();

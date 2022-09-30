@@ -3,11 +3,11 @@ using OptimizeMePlease.Context;
 
 namespace OptimizeMePlease
 {
-    public static class ContextProvider
+    public static class IndexedContextProvider
     {
-        static ContextProvider()
+        static IndexedContextProvider()
         {
-            AppDbContext = new AppDbContext();
+            AppDbContext = new IndexedDbContext();
             AppDbContext.ChangeTracker.AutoDetectChangesEnabled = false;
             AppDbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
