@@ -1,6 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Microsoft.EntityFrameworkCore;
 using OptimizeMePlease.Context;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,7 +20,7 @@ namespace OptimizeMePlease
         /// and all his/her books (Book Name/Title and Publishment Year) published before 1900
         /// </summary>
         /// <returns></returns>
-        [Benchmark]
+        //[Benchmark]
         public List<AuthorDTO> GetAuthors()
         {
             using var dbContext = new AppDbContext();
@@ -85,7 +86,7 @@ namespace OptimizeMePlease
             return finalAuthors;
         }
 
-        [Benchmark]
+        //[Benchmark]
         public List<AuthorDTO> GetAuthors_Optimized()
         {
             using var dbContext = new AppDbContext();
@@ -134,40 +135,29 @@ namespace OptimizeMePlease
         public List<AuthorDTO_Simple> GetAuthors_Optimized_Meaningful()
         {
             using var dbContext = new AppDbContext();
-
-            var authors = dbContext.Authors
+            var date = new DateTime(1900, 1, 1);
+            return dbContext.Authors
+                                        .Include(x => x.Books.Where(b => b.Published < date))
                                         .AsNoTracking()
                                         .Where(x => x.Country == "Serbia" && x.Age == 27)
-                                        .OrderByDescending(b => b.BooksCount)
+                                        .OrderByDescending(x => x.BooksCount)
                                         .Take(2)
-                                        .Include(x => x.User)
-                                        .ThenInclude(x => x.UserRoles)
-                                        .Include(x => x.Books)
-                                        .ThenInclude(x => x.Publisher)
                                         .Select(x => new AuthorDTO_Simple
                                         {
                                             FirstName = x.User.FirstName,
                                             LastName = x.User.LastName,
                                             Email = x.User.Email,
                                             UserName = x.User.UserName,
-                                            UserId = x.User.Id,
-                                            RoleId = x.User.UserRoles.SingleOrDefault(y => y.UserId == x.UserId).RoleId,
                                             BooksCount = x.BooksCount,
-                                            AllBooks = x.Books.Where(b => b.Published.Year < 1900).Select(y => new BookDto_Meaningful
+                                            AllBooks = x.Books.Select(y => new BookDto_Meaningful
                                             {
-                                                Id = y.Id,
                                                 Name = y.Name,
-                                                ISBN = y.ISBN,
-                                                PublisherName = y.Publisher.Name,
-                                                PublishedYear = y.Published.Year
+                                                PublishedYear = y.Published
                                             }),
                                             Age = x.Age,
                                             Country = x.Country,
-                                            NickName = x.NickName,
-                                            Id = x.Id
-                                        });
-
-            return authors.ToList();
+                                        })
+            .ToList();
         }
     }
 }

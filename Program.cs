@@ -24,13 +24,13 @@ namespace OptimizeMePlease
         static void Main(string[] args)
         {
             //Debugging 
-            BenchmarkService benchmarkService = new BenchmarkService();
+            //BenchmarkService benchmarkService = new BenchmarkService();
             // Original query
-            var nonOpt = benchmarkService.GetAuthors();
+            //var nonOpt = benchmarkService.GetAuthors();
             // Optimized query without uchanging the dto
-            var Opt = benchmarkService.GetAuthors_Optimized();
+            //var Opt = benchmarkService.GetAuthors_Optimized();
             // Optimized query with changing DTOs
-            var Opt_Meaningful = benchmarkService.GetAuthors_Optimized_Meaningful();
+            //var Opt_Meaningful = benchmarkService.GetAuthors_Optimized_Meaningful();
 
             //Comment me after first execution, please.
             //IWillPopulateData();
