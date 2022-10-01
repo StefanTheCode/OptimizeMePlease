@@ -17,7 +17,7 @@ using OptimizeMePlease.Entities;
 namespace OptimizeMePlease
 {
     [MemoryDiagnoser(false)]
-    //[InProcess]
+    [InProcess]
     public class BenchmarkService
     {
         /// <summary>
@@ -438,6 +438,124 @@ namespace OptimizeMePlease
                            })
                           .ToArray();
         }
+
+        [Benchmark]
+        public AuthorRecordDto[] GetAuthors_MultipleQuery()
+        {
+            using var db = ContextFactory.CreateDbContext();
+
+            var authors = GetAuthorsSimplified(db).ToList();
+            var books = GetBooksSimplified(db, authors.Select(x => x.Id)).ToList();
+            var users = GetUsersSimplified(db, authors.Select(x => x.UserId)).ToList();
+
+            return ProcessMultipleQueryResult(authors, users, books);
+        }
+
+        [Benchmark]
+        public AuthorRecordDto[] GetAuthors_MultipleQueryWithoutSelectorExpressions()
+        {
+            using var db = ContextFactory.CreateDbContext();
+
+            var authors = GetAuthorsSimplifiedWithoutSelectorExpression(db).ToList();
+            var books = GetBooksSimplifiedWithoutSelectorExpression(db, authors.Select(x => x.Id)).ToList();
+            var users = GetUsersSimplifiedWithoutSelectorExpression(db, authors.Select(x => x.UserId)).ToList();
+
+            return ProcessMultipleQueryResult(authors, users, books);
+        }
+
+        private static AuthorRecordDto[] ProcessMultipleQueryResult(IEnumerable<AuthorSimplified> authors, IReadOnlyCollection<UserSimplified> users, IReadOnlyCollection<BookSimplified> books)
+        {
+            return authors.Select(x =>
+                           {
+                               var user = users.First(y => y.Id == x.UserId);
+
+                               return new AuthorRecordDto(Age, Serbia, x.BookCount, user.UserName, user.FirstName, user.LastName, user.Email,
+                                                          books.Where(y => y.AuthorId == x.Id).Select(y => new BookRecordDto(y.Name, y.Year)).ToArray());
+                           })
+                          .ToArray();
+        }
+
+        private static readonly Func<DbContext, IEnumerable<AuthorSimplified>> GetAuthorsSimplifiedWithoutSelectorExpression =
+            EF.CompileQuery((DbContext db) =>
+                                db.Set<Author>()
+                                  .Where(AuthorWhereFilterExpression)
+                                  .OrderByDescending(x => x.BooksCount)
+                                  .Take(2)
+                                  .Select(author => new AuthorSimplified
+                                   {
+                                       Id = author.Id,
+                                       BookCount = author.BooksCount,
+                                       UserId = author.UserId
+                                   }));
+
+        private static readonly Func<DbContext, IEnumerable<int>, IEnumerable<BookSimplified>> GetBooksSimplifiedWithoutSelectorExpression =
+            EF.CompileQuery((DbContext db, IEnumerable<int> authorIds) =>
+                                db.Set<Book>()
+                                  .Where(BookWhereFilterExpression)
+                                  .Where(x => authorIds.Contains(x.AuthorId))
+                                  .Select(book => new BookSimplified
+                                   {
+                                       AuthorId = book.AuthorId,
+                                       Name = book.Name,
+                                       Year = book.Published.Year
+                                   }));
+
+        private static readonly Func<DbContext, IEnumerable<int>, IEnumerable<UserSimplified>> GetUsersSimplifiedWithoutSelectorExpression =
+            EF.CompileQuery((DbContext db, IEnumerable<int> userIds) =>
+                                db.Set<User>()
+                                  .Where(x => userIds.Contains(x.Id))
+                                  .Select(user => new UserSimplified
+                                   {
+                                       Id = user.Id,
+                                       UserName = user.UserName,
+                                       Email = user.Email,
+                                       FirstName = user.FirstName,
+                                       LastName = user.LastName
+                                   }));
+
+        private static readonly Expression<Func<Author, AuthorSimplified>> AuthorSimplifiedSelectorExpression = author => new AuthorSimplified
+        {
+            Id = author.Id,
+            BookCount = author.BooksCount,
+            UserId = author.UserId
+        };
+
+        private static readonly Func<DbContext, IEnumerable<AuthorSimplified>> GetAuthorsSimplified =
+            EF.CompileQuery((DbContext db) =>
+                                db.Set<Author>()
+                                  .Where(AuthorWhereFilterExpression)
+                                  .OrderByDescending(x => x.BooksCount)
+                                  .Take(2)
+                                  .Select(AuthorSimplifiedSelectorExpression));
+
+        private static readonly Expression<Func<Book, BookSimplified>> BookSimplifiedSelectorExpression = book => new BookSimplified
+        {
+            AuthorId = book.AuthorId,
+            Name = book.Name,
+            Year = book.Published.Year
+        };
+
+        private static readonly Func<DbContext, IEnumerable<int>, IEnumerable<BookSimplified>> GetBooksSimplified =
+            EF.CompileQuery((DbContext db, IEnumerable<int> authorIds) =>
+                                db.Set<Book>()
+                                  .Where(BookWhereFilterExpression)
+                                  .Where(x => authorIds.Contains(x.AuthorId))
+                                  .Select(BookSimplifiedSelectorExpression));
+
+        private static readonly Expression<Func<User, UserSimplified>> UserSimplifiedSelectorExpression = user => new UserSimplified
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            Email = user.Email,
+            FirstName = user.FirstName,
+            LastName = user.LastName
+        };
+
+        private static readonly Func<DbContext, IEnumerable<int>, IEnumerable<UserSimplified>> GetUsersSimplified =
+            EF.CompileQuery((DbContext db, IEnumerable<int> userIds) =>
+                                db.Set<User>()
+                                  .Where(x => userIds.Contains(x.Id))
+                                  .Select(UserSimplifiedSelectorExpression));
 
         private const string CommandText =
             @"SELECT [u].[FirstName], [u].[LastName], [u].[Email], [u].[UserName], [t].[BooksCount], [t].[Id], [u].[Id], [t0].[Name], [t0].[PublishedYear], [t0].[Id], [t].[Age], [t].[Country]
