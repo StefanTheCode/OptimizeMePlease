@@ -17,7 +17,7 @@ using OptimizeMePlease.Entities;
 namespace OptimizeMePlease
 {
     [MemoryDiagnoser(false)]
-    [InProcess]
+    //[InProcess]
     public class BenchmarkService
     {
         /// <summary>
