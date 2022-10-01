@@ -17,4 +17,11 @@ namespace OptimizeMePlease.Entities
         public Publisher Publisher { get; set; }
         public int PublisherId { get; set; }
     }
+
+    public sealed class BookSimplified
+    {
+        public int AuthorId { get; set; }
+        public string Name { get; set; }
+        public int Year { get; set; }
+    }
 }

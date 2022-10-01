@@ -1,9 +1,9 @@
-﻿using BenchmarkDotNet.Running;
+﻿using System;
+using System.IO;
+using BenchmarkDotNet.Running;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
-using System;
-using System.IO;
 
 namespace OptimizeMePlease
 {
@@ -21,27 +21,24 @@ namespace OptimizeMePlease
     /// </summary>
     public class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             //Debugging 
-            BenchmarkService benchmarkService = new BenchmarkService();
-            benchmarkService.GetAuthors();
-
+            //var benchmarkService = new BenchmarkService();
+            //var a = benchmarkService.GetAuthors_OptimizedRecordSpan();
             //Comment me after first execution, please.
             //IWillPopulateData();
 
-            //BenchmarkRunner.Run<BenchmarkService>();
+            BenchmarkRunner.Run<BenchmarkService>();
         }
 
         public static void IWillPopulateData()
         {
-            string sqlConnectionString = @"Server=localhost;Database=OptimizeMePlease;Trusted_Connection=True;Integrated Security=true;MultipleActiveResultSets=true";
-
             string workingDirectory = Environment.CurrentDirectory;
             string path = Path.Combine(Directory.GetParent(workingDirectory).Parent.Parent.FullName, @"script.sql");
             string script = File.ReadAllText(path);
 
-            SqlConnection conn = new SqlConnection(sqlConnectionString);
+            var conn = new SqlConnection(BenchmarkService.ConnectionString);
 
             Server server = new Server(new ServerConnection(conn));
 

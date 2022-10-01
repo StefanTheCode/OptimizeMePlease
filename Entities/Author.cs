@@ -16,4 +16,11 @@ namespace OptimizeMePlease.Entities
         public int UserId { get; set; }
         public virtual List<Book> Books { get; set; } = new List<Book>();
     }
+
+    public sealed class AuthorSimplified
+    {
+        public int Id { get; set; }
+        public int BookCount { get; set; }
+        public int UserId { get; set; }
+    }
 }
