@@ -11,4 +11,12 @@ namespace OptimizeMePlease
         public string PublisherName { get; set; }
         public string ISBN { get; set; }
     }
+
+    public  sealed class BookDtoOptimized
+    {
+        public string Name { get; set; }
+        public int PublishedYear { get; set; }
+    }
+
+    public sealed record BookRecordDto(string Name, int PublishedYear);
 }
