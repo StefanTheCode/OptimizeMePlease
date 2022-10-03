@@ -88,32 +88,32 @@ namespace OptimizeMePlease
         }
 
         [Benchmark]
-        public async Task<List<OptimizedAuthorDTO>> GetAuthors_Optimized()
+        public List<OptimizedAuthorDTO> GetAuthors_Optimized()
         {
             using var dbContext = new AppDbContext();
 
             DateTime authorDateFilter = new DateTime(1900, 1, 1);
 
-            return await dbContext.Authors
-                                        .AsNoTracking()
-                                        .Where(a => a.Country == "Serbia" && a.Age == 27)
-                                        .OrderByDescending(a => a.BooksCount)
-                                        .Take(2)
-                                        .Select(a => new OptimizedAuthorDTO
+            return dbContext.Authors
+                                    .AsNoTracking()
+                                    .Where(a => a.Country == "Serbia" && a.Age == 27)
+                                    .OrderByDescending(a => a.BooksCount)
+                                    .Take(2)
+                                    .Select(a => new OptimizedAuthorDTO
+                                    {
+                                        FirstName = a.User.FirstName,
+                                        LastName = a.User.LastName,
+                                        UserName = a.User.UserName,
+                                        Email = a.User.Email,
+                                        Age = a.Age,
+                                        Country = a.Country,
+                                        Books = a.Books.Where(b => b.Published < authorDateFilter).Select(b => new OptimizedBookDto
                                         {
-                                            FirstName = a.User.FirstName,
-                                            LastName = a.User.LastName,
-                                            UserName = a.User.UserName,
-                                            Email = a.User.Email,
-                                            Age = a.Age,
-                                            Country = a.Country,
-                                            Books = a.Books.Where(b => b.Published < authorDateFilter).Select(b => new OptimizedBookDto
-                                            {
-                                                Name = b.Name,
-                                                PublishedYear = b.Published.Year
-                                            })
+                                            Name = b.Name,
+                                            PublishedYear = b.Published.Year
                                         })
-                                        .ToListAsync();
+                                    })
+                                    .ToList();
         }
     }
 }
