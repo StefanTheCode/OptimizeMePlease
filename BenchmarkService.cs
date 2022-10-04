@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System;
+using BenchmarkDotNet.Attributes;
 using Microsoft.EntityFrameworkCore;
 using OptimizeMePlease.Context;
 using System.Collections.Generic;
@@ -86,9 +87,45 @@ namespace OptimizeMePlease
         }
 
         [Benchmark]
-        public List<AuthorDTO> GetAuthors_Optimized()
+        public List<AuthorDTO_Optimized> GetAuthors_Optimized()
         {
-            List<AuthorDTO> authors = new List<AuthorDTO>();
+            using var dbContext = new AppDbContext();
+
+            var date = new DateTime(1900, 1, 1);
+
+            var authors = dbContext.Authors
+                .AsNoTracking()
+                .Where(x => x.Country == "Serbia" && x.Age == 27)
+                .OrderByDescending(x => x.BooksCount)
+                .Select(x => new AuthorDTO_Optimized
+                {
+                    UserFirstName = x.User.FirstName,
+                    UserLastName = x.User.LastName,
+                    UserEmail = x.User.Email,
+                    UserName = x.User.UserName,
+                    BooksCount = x.BooksCount,
+                    AllBooks = x.Books.Select(y => new BookDto_Optimized
+                    {
+                        Name = y.Name,
+                        Published = y.Published
+                    }),
+                    AuthorAge = x.Age,
+                    AuthorCountry = x.Country,
+                })
+                .Take(2)
+                .ToList();
+
+            for (int i = 0; i < authors.Count; i++)
+            {
+                var books = new List<BookDto_Optimized>();
+                for (int j = 0; j < authors[i].AllBooks.Count(); j++)
+                {
+                    var bb = authors[i].AllBooks.ElementAt(j);
+                    if (bb.Published < date)
+                        books.Add(bb);
+                }
+                authors[i].AllBooks = books;
+            }
 
             return authors;
         }
