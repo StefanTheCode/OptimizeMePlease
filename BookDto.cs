@@ -15,6 +15,6 @@ namespace OptimizeMePlease
     public sealed class BookDTO_Optimized
     {
         public string Name { get; set; }
-        public DateTime Published { get; set; }
+        public int Published { get; set; }
     }
 }

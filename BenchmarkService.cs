@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 using BenchmarkDotNet.Attributes;
@@ -13,8 +12,6 @@ namespace OptimizeMePlease
     [MemoryDiagnoser]
     public class BenchmarkService
     {
-        private readonly DateTime _publishedDate = new(1900, 1, 1);
-
         public BenchmarkService()
         {
         }
@@ -97,8 +94,6 @@ namespace OptimizeMePlease
             using var dbContext = new AppDbContext();
 
             var authors = dbContext.Authors
-                .Include(x => x.Books.Where(b => b.Published < _publishedDate))
-                .AsNoTracking()
                 .Where(x => x.Country == "Serbia" && x.Age == 27)
                 .OrderByDescending(x => x.BooksCount)
                 .Take(2)
@@ -111,10 +106,11 @@ namespace OptimizeMePlease
                     AuthorAge = x.Age,
                     AuthorCountry = x.Country,
                     AllBooks = x.Books
+                        .Where(b => b.Published.Year < 1900)
                         .Select(y => new BookDTO_Optimized
                         {
                             Name = y.Name,
-                            Published = y.Published
+                            Published = y.Published.Year
                         })
                 });
 
