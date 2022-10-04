@@ -93,12 +93,10 @@ namespace OptimizeMePlease
 
             var date = new DateTime(1900, 1, 1);
 
-            return dbContext.Authors
-                .Include(x => x.Books.Where(b => b.Published < date))
+            var authors = dbContext.Authors
                 .AsNoTracking()
                 .Where(x => x.Country == "Serbia" && x.Age == 27)
                 .OrderByDescending(x => x.BooksCount)
-                .Take(2)
                 .Select(x => new AuthorDTO_Optimized
                 {
                     UserFirstName = x.User.FirstName,
@@ -114,7 +112,22 @@ namespace OptimizeMePlease
                     AuthorAge = x.Age,
                     AuthorCountry = x.Country,
                 })
+                .Take(2)
                 .ToList();
+
+            for (int i = 0; i < authors.Count; i++)
+            {
+                var books = new List<BookDto_Optimized>();
+                for (int j = 0; j < authors[i].AllBooks.Count(); j++)
+                {
+                    var bb = authors[i].AllBooks.ElementAt(j);
+                    if (bb.Published < date)
+                        books.Add(bb);
+                }
+                authors[i].AllBooks = books;
+            }
+
+            return authors;
         }
     }
 }
