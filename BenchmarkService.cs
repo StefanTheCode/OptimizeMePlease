@@ -88,8 +88,26 @@ namespace OptimizeMePlease
         [Benchmark]
         public List<AuthorDTO> GetAuthors_Optimized()
         {
-            List<AuthorDTO> authors = new List<AuthorDTO>();
-
+            using var dbContext = new AppDbContext();
+            var authors = dbContext.Authors
+                                        .AsNoTracking()
+                                        .Where(x => x.Country == "Serbia" && x.Age == 27)
+                                        .OrderByDescending(x => x.BooksCount)
+                                        .Select(x => new AuthorDTO
+                                        {
+                                            UserFirstName = x.User.FirstName,
+                                            UserLastName = x.User.LastName,
+                                            UserName = x.User.UserName,
+                                            UserEmail = x.User.Email,
+                                            AuthorAge = x.Age,
+                                            AuthorCountry = x.Country,
+                                            AllBooks = x.Books.Where(b => b.Published.Year < 1900).Select(y => new BookDto
+                                            {
+                                                Name = y.Name,
+                                                PublishedYear = y.Published.Year
+                                            }).ToList(),
+                                        }).Take(2).ToList();
+            
             return authors;
         }
     }
