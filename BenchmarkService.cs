@@ -92,7 +92,6 @@ namespace OptimizeMePlease
 
             var authors = dbContext
                 .Authors
-                .Include(x => x.Books.Where(b => b.Published.Year < 1900))
                 .Where(x =>
                     x.Country == "Serbia" &&
                     x.Age == 27)
@@ -116,6 +115,11 @@ namespace OptimizeMePlease
                 })
                 .Take(2)
                 .ToList();
+
+            foreach (var author in authors)
+            {
+                author.AllBooks = author.AllBooks.Where(b => b.Published.Year < 1900).ToList();
+            }
 
             return authors;
         }
