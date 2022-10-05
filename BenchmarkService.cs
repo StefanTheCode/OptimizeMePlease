@@ -128,21 +128,21 @@ namespace OptimizeMePlease
         }
 
         [Benchmark]
-        public List<AuthorDTO> GetAuthors_Optimized()
+        public List<AuthorDtoOptimised> GetAuthors_Optimized()
         {
 
             using var dbContext = new NotModifyingOriginalDbContext();
             var topAuthorsQuery = dbContext.TopAuthors.FromSqlRaw(newSql).AsNoTracking();
 
             var results = topAuthorsQuery.AsEnumerable();
-            var authors = new List<AuthorDTO>();
+            var authors = new List<AuthorDtoOptimised>();
 
-            AuthorDTO currentAuthor = null;
+            AuthorDtoOptimised currentAuthor = null;
             foreach (var item in results)
             {
                 if (item.Id != currentAuthor?.Id)
                 {
-                    currentAuthor = new AuthorDTO()
+                    currentAuthor = new AuthorDtoOptimised()
                     {
                         Id = item.Id,
                         UserFirstName = item.FirstName,
@@ -150,14 +150,14 @@ namespace OptimizeMePlease
                         UserName = item.UserName,
                         UserEmail = item.Email,
                         AuthorAge = item.Age,
-                        AuthorCountry = item.Country,
-                        AllBooks = new List<BookDto>() { new BookDto() { Name = item.Name, Published = item.Published } }
+                        AuthorCountry = item.Country                                             
                     };
+                    currentAuthor.AllBooks.Add(new BookDtoOptimised() { Name = item.Name, Published = item.Published });
                     authors.Add(currentAuthor);
                     continue;
                 }
 
-                currentAuthor.AllBooks.Add(new BookDto() { Name = item.Name, Published = item.Published });
+                currentAuthor.AllBooks.Add(new BookDtoOptimised() { Name = item.Name, Published = item.Published });
             }
 
             // var queryString = query.ToQueryString();            
@@ -171,5 +171,24 @@ namespace OptimizeMePlease
                 SummaryStyle = SummaryStyle.Default.WithRatioStyle(RatioStyle.Trend);
             }
         }
+    }
+
+    public class BookDtoOptimised
+    {
+        public string Name { get; set; }
+        public DateTime Published { get; set; }
+    }
+
+    public class AuthorDtoOptimised
+    {
+        public int Id { get; set; }
+        public string UserFirstName { get; set; }
+        public string UserLastName { get; set; }
+        public string UserName { get; set; }
+        public string UserEmail { get; set; }
+        public int AuthorAge { get; set; }
+        public string AuthorCountry { get; set; }
+
+        public List<BookDtoOptimised> AllBooks { get; set; } = new List<BookDtoOptimised>();
     }
 }
