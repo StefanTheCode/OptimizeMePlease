@@ -33,7 +33,7 @@ namespace OptimizeMePlease
 
             authors.ShouldDeepEqual(optimizedAuthors);
             authors.ShouldDeepEqual(indexedAuthors);
-            //authors.ShouldDeepEqual(expressionAuthors);
+            authors.ShouldDeepEqual(expressionAuthors);
 
             //Comment me after first execution, please.
             //IWillPopulateData();

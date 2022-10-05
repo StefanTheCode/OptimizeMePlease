@@ -182,25 +182,36 @@ namespace OptimizeMePlease
         private static readonly Expression<Func<Author, bool>> AuthorWhereFilterExpression = author => (author.Country == Serbia) && (author.Age == Age);
         private static readonly Expression<Func<Book, bool>> BookWhereFilterExpression = book => book.Published < EF.Functions.DateFromParts(Year, 1, 1);
 
-        private static readonly Expression<Func<Book, BookDto>> BookSelectorExpression = book => new BookDto
+        private static readonly Expression<Func<Book, BookDto>> BookSelectorExpression = y => new BookDto
         {
-            Name = book.Name,
-            PublishedYear = book.Published.Year
+            Id = y.Id,
+            Name = y.Name,
+            Published = y.Published,
+            ISBN = y.ISBN,
+            PublisherName = y.Publisher.Name,
+            PublishedYear = y.Published.Year
         };
 
-        private static readonly Expression<Func<Author, AuthorDTO>> AuthorDtoSelectorExpression = author => new AuthorDTO
+        private static readonly Expression<Func<Author, AuthorDTO>> AuthorDtoSelectorExpression = x => new AuthorDTO
         {
-            UserFirstName = author.User.FirstName,
-            UserLastName = author.User.LastName,
-            UserEmail = author.User.Email,
-            UserName = author.User.UserName,
-            BooksCount = author.BooksCount,
-            AllBooks = author.Books.AsQueryable()
+            UserCreated = x.User.Created,
+            UserEmailConfirmed = x.User.EmailConfirmed,
+            UserFirstName = x.User.FirstName,
+            UserLastActivity = x.User.LastActivity,
+            UserLastName = x.User.LastName,
+            UserEmail = x.User.Email,
+            UserName = x.User.UserName,
+            UserId = x.User.Id,
+            RoleId = x.User.UserRoles.FirstOrDefault().RoleId,
+            BooksCount = x.BooksCount,
+            AllBooks = x.Books.AsQueryable()
                           .Where(BookWhereFilterExpression)
                           .Select(BookSelectorExpression)
                           .ToList(),
-            AuthorAge = author.Age,
-            AuthorCountry = author.Country
+            AuthorAge = x.Age,
+            AuthorCountry = x.Country,
+            AuthorNickName = x.NickName,
+            Id = x.Id
         };
 
         private static readonly Func<DbContext, IEnumerable<AuthorDTO>> Get =
