@@ -1,11 +1,17 @@
 ﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Order;
 using Microsoft.EntityFrameworkCore;
 using OptimizeMePlease.Context;
+using OptimizeMePlease.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace OptimizeMePlease
 {
+    [InProcess]
+    [Orderer(SummaryOrderPolicy.FastestToSlowest)]
     [MemoryDiagnoser]
     public class BenchmarkService
     {
@@ -19,7 +25,7 @@ namespace OptimizeMePlease
         /// and all his/her books (Book Name/Title and Publishment Year) published before 1900
         /// </summary>
         /// <returns></returns>
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public List<AuthorDTO> GetAuthors()
         {
             using var dbContext = new AppDbContext();
@@ -160,5 +166,49 @@ namespace OptimizeMePlease
 
             return orderedAuthors.ToList();
         }
+
+        [Benchmark]
+        public IList<AuthorDTO> GetAuthors_Optimized_Expression()
+        {
+            var db = ContextProvider.AppDbContext;
+
+            return Get(db).ToList();
+        }
+
+        private const string Serbia = nameof(Serbia);
+        private const int Age = 27;
+        private const int Year = 1900;
+
+        private static readonly Expression<Func<Author, bool>> AuthorWhereFilterExpression = author => (author.Country == Serbia) && (author.Age == Age);
+        private static readonly Expression<Func<Book, bool>> BookWhereFilterExpression = book => book.Published < EF.Functions.DateFromParts(Year, 1, 1);
+
+        private static readonly Expression<Func<Book, BookDto>> BookSelectorExpression = book => new BookDto
+        {
+            Name = book.Name,
+            PublishedYear = book.Published.Year
+        };
+
+        private static readonly Expression<Func<Author, AuthorDTO>> AuthorDtoSelectorExpression = author => new AuthorDTO
+        {
+            UserFirstName = author.User.FirstName,
+            UserLastName = author.User.LastName,
+            UserEmail = author.User.Email,
+            UserName = author.User.UserName,
+            BooksCount = author.BooksCount,
+            AllBooks = author.Books.AsQueryable()
+                          .Where(BookWhereFilterExpression)
+                          .Select(BookSelectorExpression)
+                          .ToList(),
+            AuthorAge = author.Age,
+            AuthorCountry = author.Country
+        };
+
+        private static readonly Func<DbContext, IEnumerable<AuthorDTO>> Get =
+            EF.CompileQuery((DbContext db) =>
+                                db.Set<Author>()
+                                  .Where(AuthorWhereFilterExpression)
+                                  .OrderByDescending(x => x.BooksCount)
+                                  .Take(2)
+                                  .Select(AuthorDtoSelectorExpression));
     }
 }

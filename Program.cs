@@ -29,9 +29,11 @@ namespace OptimizeMePlease
             var authors = benchmarkService.GetAuthors();
             var optimizedAuthors = benchmarkService.GetAuthors_Optimized();
             var indexedAuthors = benchmarkService.GetAuthors_Optimized_Indexed();
+            var expressionAuthors = benchmarkService.GetAuthors_Optimized_Expression();
 
             authors.ShouldDeepEqual(optimizedAuthors);
             authors.ShouldDeepEqual(indexedAuthors);
+            //authors.ShouldDeepEqual(expressionAuthors);
 
             //Comment me after first execution, please.
             //IWillPopulateData();
