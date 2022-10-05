@@ -167,6 +167,10 @@ namespace OptimizeMePlease
             return orderedAuthors.ToList();
         }
 
+        /// <summary>
+        /// Not my original work, copied and adapted from https://github.com/qjustfeelitp/OptimizeMePlease_Challange.
+        /// </summary>
+        /// <returns></returns>
         [Benchmark]
         public IList<AuthorDTO> GetAuthors_Optimized_Expression()
         {
