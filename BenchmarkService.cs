@@ -1,5 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Order;
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using OptimizeMePlease.Context;
 using OptimizeMePlease.Entities;
@@ -11,7 +11,6 @@ using System.Linq.Expressions;
 namespace OptimizeMePlease
 {
     [InProcess]
-    [Orderer(SummaryOrderPolicy.FastestToSlowest)]
     [MemoryDiagnoser]
     public class BenchmarkService
     {
@@ -167,6 +166,89 @@ namespace OptimizeMePlease
             return orderedAuthors.ToList();
         }
 
+        const string dapperSql = """
+            SELECT u.Created UserCreated,
+                   u.EmailConfirmed UserEmailConfirmed,
+                   u.FirstName UserFirstName,
+                   u.LastActivity UserLastActivity,
+                   u.LastName UserLastName,
+                   u.Email UserEmail,
+                   u.UserName UserName,
+                   u.Id UserId,
+                   (SELECT TOP 1 RoleId FROM UserRoles ur WHERE ur.UserId = a.UserId) RoleId,
+                   a.BooksCount,
+                   a.Age AuthorAge, a.Country AuthorCountry, a.NickName AuthorNickName, a.Id,
+                   b.Id, b.Name, b.Published, b.ISBN, b.PublisherName, b.PublishedYear
+              FROM Authors a
+              JOIN Users u ON u.Id = a.UserId
+              JOIN (
+                    SELECT b.Id, b.Name, b.Published, b.ISBN, p.Name PublisherName, DATEPART(YEAR, b.Published) PublishedYear, b.AuthorId
+                        FROM Books b
+                        JOIN Publishers p ON p.Id = b.PublisherId
+                    ) b ON b.AuthorId = a.Id AND PublishedYear < @publishedYear
+             WHERE a.Country = @country AND a.Age = @age
+             ORDER BY a.BooksCount, b.Id;
+            """;
+        [Benchmark]
+        public List<AuthorDTO> GetAuthors_Optimized_Dapper()
+        {
+            var queriedAuthors = new Dictionary<int, AuthorDTO>();
+
+            var authors = ContextProvider.AppDbContext.Database.GetDbConnection().Query<AuthorDTO, BookDto, AuthorDTO>(
+                dapperSql,
+                (author, book) =>
+                {
+                    if (!queriedAuthors.TryGetValue(author.Id, out var authorEntry))
+                    {
+                        authorEntry = author;
+                        authorEntry.AllBooks ??= new List<BookDto>();
+                        queriedAuthors.Add(authorEntry.Id, authorEntry);
+                    }
+
+                    if (!authorEntry.AllBooks.Any(b => b.Id == book.Id))
+                    {
+                        authorEntry.AllBooks.Add(book);
+                    }
+
+                    return authorEntry;
+                },
+                new { country = "Serbia", age = 27, publishedYear = 1900 }
+                )
+            .ToList();
+
+            return queriedAuthors.Values.ToList();
+        }
+
+        [Benchmark]
+        public List<AuthorDTO> GetAuthors_Optimized_DapperIndexed()
+        {
+            var queriedAuthors = new Dictionary<int, AuthorDTO>();
+
+            var authors = IndexedContextProvider.AppDbContext.Database.GetDbConnection().Query<AuthorDTO, BookDto, AuthorDTO>(
+                dapperSql,
+                (author, book) =>
+                {
+                    if (!queriedAuthors.TryGetValue(author.Id, out var authorEntry))
+                    {
+                        authorEntry = author;
+                        authorEntry.AllBooks ??= new List<BookDto>();
+                        queriedAuthors.Add(authorEntry.Id, authorEntry);
+                    }
+
+                    if (!authorEntry.AllBooks.Any(b => b.Id == book.Id))
+                    {
+                        authorEntry.AllBooks.Add(book);
+                    }
+
+                    return authorEntry;
+                },
+                new { country = "Serbia", age = 27, publishedYear = 1900 }
+                )
+            .ToList();
+
+            return queriedAuthors.Values.ToList();
+        }
+
         /// <summary>
         /// Not my original work, copied and adapted from https://github.com/qjustfeelitp/OptimizeMePlease_Challange.
         /// </summary>
@@ -175,6 +257,13 @@ namespace OptimizeMePlease
         public IList<AuthorDTO> GetAuthors_Optimized_Expression()
         {
             var db = ContextProvider.AppDbContext;
+
+            return Get(db).ToList();
+        }
+        [Benchmark]
+        public IList<AuthorDTO> GetAuthors_Optimized_ExpressionIndexed()
+        {
+            var db = IndexedContextProvider.AppDbContext;
 
             return Get(db).ToList();
         }

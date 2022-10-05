@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
+    <PackageReference Include="Dapper" Version="2.0.123" />
     <PackageReference Include="DeepEqual" Version="4.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.0-rc.1.22426.7" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.47027.0" />
