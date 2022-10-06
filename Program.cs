@@ -26,16 +26,17 @@ namespace OptimizeMePlease
             //Debugging 
             BenchmarkService benchmarkService = new BenchmarkService();
             benchmarkService.GetAuthors();
+            benchmarkService.GetAuthors_Optimized();
 
             //Comment me after first execution, please.
             //IWillPopulateData();
 
-            //BenchmarkRunner.Run<BenchmarkService>();
+            BenchmarkRunner.Run<BenchmarkService>();
         }
 
         public static void IWillPopulateData()
         {
-            string sqlConnectionString = @"Server=localhost;Database=OptimizeMePlease;Trusted_Connection=True;Integrated Security=true;MultipleActiveResultSets=true";
+            string sqlConnectionString = @"Server=(localdb)\MSSQLLocalDB;Database=OptimizeMePlease;Trusted_Connection=True;MultipleActiveResultSets=true";
 
             string workingDirectory = Environment.CurrentDirectory;
             string path = Path.Combine(Directory.GetParent(workingDirectory).Parent.Parent.FullName, @"script.sql");
