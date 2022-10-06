@@ -15,10 +15,6 @@
 
 # How do I submit my solution?
 
-- Send me a Linkedin message with your github username, I will add you and create a branch for you.
-
-### OR
-
 - Clone the project, create a branch and work on that branch.
 
 ### OR
