@@ -1,6 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using OptimizeMePlease.Context;
 using OptimizeMePlease.Entities;
 using System;
@@ -14,8 +15,22 @@ namespace OptimizeMePlease
     [MemoryDiagnoser]
     public class BenchmarkService
     {
+        PooledDbContextFactory<AppDbContext> _dbContextFactory;
+        PooledDbContextFactory<AppDbContext> _indexedDbContextFactory;
+
         public BenchmarkService()
         {
+            var options = new DbContextOptionsBuilder<AppDbContext>()
+                .UseSqlServer("Server=localhost;Database=OptimizeMePlease;Trusted_Connection=True;Integrated Security=true;MultipleActiveResultSets=true;Encrypt=false")
+                .Options;
+
+            _dbContextFactory = new PooledDbContextFactory<AppDbContext>(options);
+
+            var indexedDbOptions = new DbContextOptionsBuilder<AppDbContext>()
+                .UseSqlServer("Server=localhost;Database=OptimizeMePlease-Indexed;Trusted_Connection=True;Integrated Security=true;MultipleActiveResultSets=true;Encrypt=false")
+                .Options;
+
+            _indexedDbContextFactory = new PooledDbContextFactory<AppDbContext>(indexedDbOptions);
         }
 
         /// <summary>
@@ -27,7 +42,7 @@ namespace OptimizeMePlease
         [Benchmark(Baseline = true)]
         public List<AuthorDTO> GetAuthors()
         {
-            using var dbContext = new AppDbContext();
+            using var dbContext = _dbContextFactory.CreateDbContext();
 
             var authors = dbContext.Authors
                                         .Include(x => x.User)
@@ -93,8 +108,10 @@ namespace OptimizeMePlease
         [Benchmark]
         public List<AuthorDTO> GetAuthors_Optimized()
         {
+            using var dbContext = _dbContextFactory.CreateDbContext();
+
             var authors =
-                ContextProvider.AppDbContext.Authors
+                dbContext.Authors
                     .Select(x => new AuthorDTO
                     {
                         UserCreated = x.User.Created,
@@ -131,8 +148,10 @@ namespace OptimizeMePlease
         [Benchmark]
         public List<AuthorDTO> GetAuthors_Optimized_Indexed()
         {
+            using var dbContext = _indexedDbContextFactory.CreateDbContext();
+
             var authors =
-                IndexedContextProvider.AppDbContext.Authors
+                dbContext.Authors
                     .Select(x => new AuthorDTO
                     {
                         UserCreated = x.User.Created,
@@ -192,9 +211,11 @@ namespace OptimizeMePlease
         [Benchmark]
         public List<AuthorDTO> GetAuthors_Optimized_Dapper()
         {
+            using var dbContext = _dbContextFactory.CreateDbContext();
+
             var queriedAuthors = new Dictionary<int, AuthorDTO>();
 
-            var authors = ContextProvider.AppDbContext.Database.GetDbConnection().Query<AuthorDTO, BookDto, AuthorDTO>(
+            var authors = dbContext.Database.GetDbConnection().Query<AuthorDTO, BookDto, AuthorDTO>(
                 dapperSql,
                 (author, book) =>
                 {
@@ -222,9 +243,11 @@ namespace OptimizeMePlease
         [Benchmark]
         public List<AuthorDTO> GetAuthors_Optimized_DapperIndexed()
         {
+            using var dbContext = _indexedDbContextFactory.CreateDbContext();
+
             var queriedAuthors = new Dictionary<int, AuthorDTO>();
 
-            var authors = IndexedContextProvider.AppDbContext.Database.GetDbConnection().Query<AuthorDTO, BookDto, AuthorDTO>(
+            var authors = dbContext.Database.GetDbConnection().Query<AuthorDTO, BookDto, AuthorDTO>(
                 dapperSql,
                 (author, book) =>
                 {
@@ -256,16 +279,16 @@ namespace OptimizeMePlease
         [Benchmark]
         public IList<AuthorDTO> GetAuthors_Optimized_Expression()
         {
-            var db = ContextProvider.AppDbContext;
+            using var dbContext = _dbContextFactory.CreateDbContext();
 
-            return Get(db).ToList();
+            return Get(dbContext).ToList();
         }
         [Benchmark]
         public IList<AuthorDTO> GetAuthors_Optimized_ExpressionIndexed()
         {
-            var db = IndexedContextProvider.AppDbContext;
+            using var dbContext = _indexedDbContextFactory.CreateDbContext();
 
-            return Get(db).ToList();
+            return Get(dbContext).ToList();
         }
 
         private const string Serbia = nameof(Serbia);
