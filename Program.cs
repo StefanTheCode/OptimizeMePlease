@@ -26,11 +26,12 @@ namespace OptimizeMePlease
             //Debugging 
             BenchmarkService benchmarkService = new BenchmarkService();
             benchmarkService.GetAuthors();
+            benchmarkService.GetAuthors_Optimized();
 
             //Comment me after first execution, please.
             //IWillPopulateData();
 
-            //BenchmarkRunner.Run<BenchmarkService>();
+            BenchmarkRunner.Run<BenchmarkService>();
         }
 
         public static void IWillPopulateData()

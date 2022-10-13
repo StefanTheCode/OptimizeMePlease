@@ -7,7 +7,8 @@ using System.Linq;
 namespace OptimizeMePlease
 {
     [MemoryDiagnoser]
-    public class BenchmarkService
+    [Config(typeof(Config))]
+    public partial class BenchmarkService
     {
         public BenchmarkService()
         {
@@ -19,7 +20,7 @@ namespace OptimizeMePlease
         /// and all his/her books (Book Name/Title and Publishment Year) published before 1900
         /// </summary>
         /// <returns></returns>
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public List<AuthorDTO> GetAuthors()
         {
             using var dbContext = new AppDbContext();
@@ -88,9 +89,37 @@ namespace OptimizeMePlease
         [Benchmark]
         public List<AuthorDTO> GetAuthors_Optimized()
         {
-            List<AuthorDTO> authors = new List<AuthorDTO>();
+            using var dbContext = new AppDbContext();
+
+            var authors = (from author in dbContext.Authors
+                    where author.Country == "Serbia" && author.Age == 27
+                    orderby author.BooksCount descending
+                    select new AuthorDTO
+                    {
+                        UserFirstName = author.User.FirstName,
+                        UserLastName = author.User.LastName,
+                        UserName = author.User.UserName,
+                        UserEmail = author.User.Email,
+                        AuthorAge = author.Age,
+                        AuthorCountry = author.Country,
+                        AllBooks = author.Books.Select(book => new BookDto
+                        {
+                            Id = book.Id,
+                            Name = book.Name,
+                            Published = book.Published
+                        }).ToList()
+                    })
+                    .AsNoTracking()
+                    .Take(2)
+                    .ToList();
+
+            authors.ForEach(author =>
+            {
+                author.AllBooks = author.AllBooks.Where(book => book.Published.Year < 1900).ToList();
+            });
 
             return authors;
         }
+    
     }
 }
