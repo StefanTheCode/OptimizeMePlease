@@ -1,17 +1,30 @@
 ﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Columns;
+using BenchmarkDotNet.Configs;
 using Microsoft.EntityFrameworkCore;
 using OptimizeMePlease.Context;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace OptimizeMePlease
 {
     [MemoryDiagnoser]
+    [HideColumns(BenchmarkDotNet.Columns.Column.Job, BenchmarkDotNet.Columns.Column.RatioSD, BenchmarkDotNet.Columns.Column.StdDev, BenchmarkDotNet.Columns.Column.AllocRatio)]
+    //[Config(typeof(Config))]
     public class BenchmarkService
     {
         public BenchmarkService()
         {
         }
+
+        //private class Config : ManualConfig
+        //{
+        //    public Config()
+        //    {
+        //        SummaryStyle = BenchmarkDotNet.Reports.SummaryStyle.Default.WithRatioStyle(RatioStyle.Trend);
+        //    }
+        //}
 
         /// <summary>
         /// Get top 2 Authors (FirstName, LastName, UserName, Email, Age, Country) 
@@ -85,12 +98,90 @@ namespace OptimizeMePlease
             return finalAuthors;
         }
 
-        [Benchmark]
-        public List<AuthorDTO> GetAuthors_Optimized()
-        {
-            List<AuthorDTO> authors = new List<AuthorDTO>();
+        //[Benchmark]
+        //public List<AuthorDTO_Optimized> GetAuthors_Optimized()
+        //{
+        //    using var dbContext = new AppDbContext();
 
-            return authors;
+        //    var date = new DateTime(1900, 1, 1);
+
+        //    return dbContext.Authors
+        //        .IncludeOptimized(x => x.Books.Where(b => b.Published < date))
+        //        .AsNoTracking()
+        //        .Where(x => x.Country == "Serbia" && x.Age == 27)
+        //        .OrderByDescending(x => x.BooksCount)
+        //        .Take(2)
+        //        .Select(x => new AuthorDTO_Optimized
+        //        {
+        //            FirstName = x.User.FirstName,
+        //            LastName = x.User.LastName,
+        //            Email = x.User.Email,
+        //            UserName = x.User.UserName,
+        //            Books = x.Books.Select(y => new BookDTO_Optimized
+        //            {
+        //                Title = y.Name,
+        //                PublishedYear = y.Published.Year
+        //            }),
+        //            Age = x.Age,
+        //            Country = x.Country,
+        //        })
+        //        .ToList();
+        //}
+
+        //[Benchmark]
+        public List<AuthorDTO_OptimizedStruct> GetAuthors_Optimized_Struct()
+        {
+            using var dbContext = new AppDbContext();
+
+            var date = new DateTime(1900, 1, 1);
+
+            return dbContext.Authors
+                //.IncludeOptimized(x => x.Books)
+                .Where(x => x.Country == "Serbia" && x.Age == 27)
+                .OrderByDescending(x => x.BooksCount)
+                .Select(x => new AuthorDTO_OptimizedStruct
+                {
+                    FirstName = x.User.FirstName,
+                    LastName = x.User.LastName,
+                    Email = x.User.Email,
+                    UserName = x.User.UserName,
+                    Books = x.Books.Where(b => b.Published.Year < 1900).Select(y => new BookDTO_OptimizedStruct
+                    {
+                        Title = y.Name,
+                        PublishedYear = y.Published.Year
+                    }),
+                    Age = x.Age,
+                    Country = x.Country,
+                })
+                .Take(2)
+                .ToList();
+        }
+
+        //[Benchmark]
+        public List<AuthorDTO_OptimizedStruct> GetAuthors_Optimized_Struct1()
+        {
+            using var dbContext = new AppDbContext();
+
+            return dbContext.Authors
+                .Where(x => x.Country == "Serbia" && x.Age == 27 && x.Books.Any(y => y.Published.Year < 1900))
+                //.IncludeOptimized(x => x.Books.Where(y => y.Published.Year < 1900))
+                .OrderByDescending(x => x.BooksCount)
+                .Select(x => new AuthorDTO_OptimizedStruct
+                {
+                    FirstName = x.User.FirstName,
+                    LastName = x.User.LastName,
+                    Email = x.User.Email,
+                    UserName = x.User.UserName,
+                    Books = x.Books.Select(y => new BookDTO_OptimizedStruct
+                    {
+                        Title = y.Name,
+                        PublishedYear = y.Published.Year
+                    }),
+                    Age = x.Age,
+                    Country = x.Country,
+                })
+                .Take(2)
+                .ToList();
         }
     }
 }

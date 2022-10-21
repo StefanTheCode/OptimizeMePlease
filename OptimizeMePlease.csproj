@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -16,6 +16,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.47027.0" />
+    <!--<PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="6.15.1" />-->
   </ItemGroup>
 
 </Project>

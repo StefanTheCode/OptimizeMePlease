@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using OptimizeMePlease.Entities;
+using System;
 
 namespace OptimizeMePlease.Context
 {

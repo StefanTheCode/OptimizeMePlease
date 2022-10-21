@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace OptimizeMePlease
 {
-    public class AuthorDTO
+    public  class AuthorDTO
     {
         public DateTime UserCreated { get; set; }
         public bool UserEmailConfirmed { get; set; }
@@ -21,5 +21,40 @@ namespace OptimizeMePlease
         public int AuthorAge { get; set; }
         public string AuthorCountry { get; set; }
         public string AuthorNickName { get; set; }
+    }
+
+    public sealed class AuthorDTO_Optimized
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public int Age { get; set; }
+        public string Country { get; set; }
+        public IEnumerable<BookDTO_Optimized> Books { get; set; }
+    }
+
+    public struct AuthorDTO_OptimizedStruct
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public int Age { get; set; }
+        public string Country { get; set; }
+        public IEnumerable<BookDTO_OptimizedStruct> Books { get; set; }
+    }
+
+    public struct BookDTO_OptimizedStruct
+    {
+        public string Title { get; set; }
+        public int PublishedYear { get; set; }
+    }
+
+    public sealed class BookDTO_Optimized
+    {
+        public string Title { get; set; }
+        public DateTime Published { get; set; }
+        public int PublishedYear { get; set; }
     }
 }
