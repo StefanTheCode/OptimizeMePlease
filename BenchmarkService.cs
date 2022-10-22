@@ -134,27 +134,27 @@ namespace OptimizeMePlease
 			return authors;
 		}
 
-		private static readonly Func<AppDbContext, IEnumerable<AuthorDTO>> CompiledQuery =
-				EF.CompileQuery((AppDbContext context) => context.Authors
-						.Include(author => author.User)
-						.Include(author => author.Books.Where(book => book.Published.Year < 1900))
-						.Where(author => author.Country == "Serbia" && author.Age == 27)
-						.OrderByDescending(author => author.BooksCount)
-						.Select(author => new AuthorDTO
-						{
-							UserFirstName = author.User.FirstName,
-							UserLastName = author.User.LastName,
-							UserEmail = author.User.Email,
-							UserName = author.User.UserName,
-							AuthorAge = author.Age,
-							AuthorCountry = author.Country,
-							AllBooks = author.Books.Select(book => new BookDto
-							{
-								Name = book.Name,
-								Published = book.Published
-							}).ToList(),
-						})
-						.Take(2));
+		private static readonly Func<AppDbContext, IEnumerable<AuthorDTO>> CompiledQuery = EF.CompileQuery(
+			(AppDbContext context) => context.Authors
+				.Include(author => author.User)
+				.Include(author => author.Books.Where(book => book.Published.Year < 1900))
+				.Where(author => author.Country == "Serbia" && author.Age == 27)
+				.OrderByDescending(author => author.BooksCount)
+				.Select(author => new AuthorDTO
+				{
+					UserFirstName = author.User.FirstName,
+					UserLastName = author.User.LastName,
+					UserEmail = author.User.Email,
+					UserName = author.User.UserName,
+					AuthorAge = author.Age,
+					AuthorCountry = author.Country,
+					AllBooks = author.Books.Select(book => new BookDto
+					{
+						Name = book.Name,
+						Published = book.Published
+					}).ToList(),
+				})
+				.Take(2));
 
 		[Benchmark]
 		public List<AuthorDTO> GetAuthorsOptimized_CompiledExpressions()

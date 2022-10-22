@@ -8,7 +8,7 @@ namespace OptimizeMePlease.Context
 	{
 		protected override void OnConfiguring(DbContextOptionsBuilder options)
 		{
-			options.UseSqlite(Program.ConnectionString);
+			options.UseSqlite(Program.GetConnectionString());
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)

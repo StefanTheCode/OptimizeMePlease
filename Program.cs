@@ -20,8 +20,6 @@ namespace OptimizeMePlease
 	/// </summary>
 	public class Program
 	{
-		public const string ConnectionString = @"Filename=C:\Users\narta\source\repos\OptimizeMePlease\database.sqlite";
-
 		static void Main(string[] args)
 		{
 #if DEBUG
@@ -41,7 +39,7 @@ namespace OptimizeMePlease
 
 		public static void CreateDb()
 		{
-			var dbContext = new AppDbContext();
+			using var dbContext = new AppDbContext();
 
 			dbContext.Database.EnsureCreated();
 			Console.WriteLine("Database is created");
@@ -58,23 +56,43 @@ namespace OptimizeMePlease
 			var userrolesSql = File.ReadAllText(Path.Combine("insert_scripts", "userroles.sql"));
 			var usersSql = File.ReadAllText(Path.Combine("insert_scripts", "users.sql"));
 
+			Console.Write("Inserting users");
 			dbContext.Database.ExecuteSqlRaw(usersSql);
-			Console.WriteLine("Users - inserted");
+			Console.WriteLine(": done");
 
+			Console.Write("Inserting roles");
 			dbContext.Database.ExecuteSqlRaw(rolesSql);
-			Console.WriteLine("Roles - inserted");
+			Console.WriteLine(": done");
 
+			Console.Write("Inserting userroles");
 			dbContext.Database.ExecuteSqlRaw(userrolesSql);
-			Console.WriteLine("UserRoles - inserted");
+			Console.WriteLine(": done");
 
+			Console.Write("Inserting publishers");
 			dbContext.Database.ExecuteSqlRaw(publishersSql);
-			Console.WriteLine("Publishers - inserted");
+			Console.WriteLine(": done");
 
+			Console.Write("Inserting authors");
 			dbContext.Database.ExecuteSqlRaw(authorsSql);
-			Console.WriteLine("Authors - inserted");
+			Console.WriteLine(": done");
 
+			Console.Write("Inserting books");
 			dbContext.Database.ExecuteSqlRaw(booksSql);
-			Console.WriteLine("Books - inserted");
+			Console.WriteLine(": done");
+		}
+
+		public static string GetConnectionString()
+		{
+			var currentFolder = new DirectoryInfo(Environment.CurrentDirectory);
+
+			while (currentFolder.Name != "OptimizeMePlease")
+			{
+				currentFolder = currentFolder.Parent;
+			}
+
+			Console.WriteLine(Path.Combine(currentFolder.FullName, "database.sqlite"));
+
+			return $"Filename={Path.Combine(currentFolder.FullName, "database.sqlite")}";
 		}
 	}
 }
