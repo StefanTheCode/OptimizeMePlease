@@ -1,6 +1,6 @@
 # OptimizeMePlease
 
-### This is a challenge project
+### This is a challenge project for tunning EF query
 
 ## You are probably here because you saw my post on Linkedin.
 ## Welcome!
