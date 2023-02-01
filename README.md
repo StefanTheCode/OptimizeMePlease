@@ -1,6 +1,7 @@
 # OptimizeMePlease
 
 ### This is a challenge project for tunning EF query, please see the latest changes here [Repo](https://github.com/StefanTheCode/OptimizeMePlease)
+This was a good practice to challenge you knowledge about EF.
 
 ## You are probably here because you saw my post on Linkedin.
 ## Welcome!
