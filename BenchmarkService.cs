@@ -108,6 +108,7 @@ namespace OptimizeMePlease
             
             var orderedAuthors = dbContext.Authors.AsNoTracking()
                 .Include(x => x.User)
+                .Where(x => x.Country == "Serbia" && x.Age == 27)
                 .OrderByDescending(x=>x.BooksCount)
                 .Select(x => new AuthorDto_Optimized
                 {
@@ -121,12 +122,10 @@ namespace OptimizeMePlease
                     Age = x.Age,
                     Country = x.Country
                 })
-                  
-                .Where(x => x.Country == "Serbia" && x.Age == 27)
                 .Take(2).ToList();
          
 
-            var userIdArray = orderedAuthors.Select(x => x.UserId).ToArray();
+            var userIdArray = orderedAuthors.Select(x => x.Id).ToArray();
             var dt = new DateTime(1900, 1, 1);
             var books = dbContext.Books.Where(x => userIdArray.Contains(x.AuthorId) && x.Published < dt).Select(x => new BookStruct()
             {
@@ -174,7 +173,7 @@ namespace OptimizeMePlease
         //        .ToList();
         //}
 
-        //[Benchmark]
+        [Benchmark]
         public List<AuthorDTO_OptimizedStruct> GetAuthors_Optimized_Struct()
         {
             using var dbContext = new AppDbContext();
