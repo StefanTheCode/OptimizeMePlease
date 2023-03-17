@@ -107,8 +107,8 @@ namespace OptimizeMePlease
             using var dbContext = new AppDbContext();
             
             var orderedAuthors = dbContext.Authors.AsNoTracking()
-                .Include(x => x.User)
                 .Where(x => x.Country == "Serbia" && x.Age == 27)
+                .Include(x => x.User)
                 .OrderByDescending(x=>x.BooksCount)
                 .Select(x => new AuthorDto_Optimized
                 {
