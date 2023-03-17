@@ -32,7 +32,7 @@ namespace OptimizeMePlease
         /// and all his/her books (Book Name/Title and Publishment Year) published before 1900
         /// </summary>
         /// <returns></returns>
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public List<AuthorDTO> GetAuthors()
         {
             using var dbContext = new AppDbContext();
@@ -173,7 +173,7 @@ namespace OptimizeMePlease
         //        .ToList();
         //}
 
-        [Benchmark]
+        //[Benchmark]
         public List<AuthorDTO_OptimizedStruct> GetAuthors_Optimized_Struct()
         {
             using var dbContext = new AppDbContext();
