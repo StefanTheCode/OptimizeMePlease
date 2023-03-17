@@ -32,7 +32,7 @@ namespace OptimizeMePlease
         /// and all his/her books (Book Name/Title and Publishment Year) published before 1900
         /// </summary>
         /// <returns></returns>
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public List<AuthorDTO> GetAuthors()
         {
             using var dbContext = new AppDbContext();
@@ -97,6 +97,51 @@ namespace OptimizeMePlease
 
             return finalAuthors;
         }
+        
+        /// Get top 2 Authors (FirstName, LastName, UserName, Email, Age, Country) 
+        /// from country Serbia aged 27, with the highest BooksCount
+        /// and all his/her books (Book Name/Title and Publishment Year) published before 1900
+        [Benchmark]
+        public List<AuthorDto_Optimized> GetAuthors_Optimized_()
+        {
+            using var dbContext = new AppDbContext();
+            
+            var orderedAuthors = dbContext.Authors.AsNoTracking()
+                .Where(x => x.Country == "Serbia" && x.Age == 27)
+                .Include(x => x.User)
+                .OrderByDescending(x=>x.BooksCount)
+                .Select(x => new AuthorDto_Optimized
+                {
+                    
+                    Id = x.Id,
+                    FirstName = x.User.FirstName,
+                    LastName = x.User.LastName,
+                    Email = x.User.Email,
+                    UserName = x.User.UserName,
+                    UserId = x.UserId,
+                    Age = x.Age,
+                    Country = x.Country
+                })
+                .Take(2).ToList();
+         
+
+            var userIdArray = orderedAuthors.Select(x => x.Id).ToArray();
+            var dt = new DateTime(1900, 1, 1);
+            var books = dbContext.Books.Where(x => userIdArray.Contains(x.AuthorId) && x.Published < dt).Select(x => new BookStruct()
+            {
+                AuthorId = x.AuthorId,
+                Title = x.Name,
+                PublishedYear = x.Published.Year
+            }).ToList();
+            
+            foreach (var auth in orderedAuthors)
+            {
+                auth.Books = books.Where(b => b.AuthorId == auth.Id).ToList();
+            }
+            
+            return orderedAuthors;
+        }
+        
 
         //[Benchmark]
         //public List<AuthorDTO_Optimized> GetAuthors_Optimized()
