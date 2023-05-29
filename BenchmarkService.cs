@@ -103,34 +103,34 @@ namespace OptimizeMePlease
 		{
 			using var dbContext = new AppDbContext();
 
-
-			var authors = dbContext.Authors
-				.Include(a => a.User)
-				.Include(a => a.Books)
-				.Where(a => a.Country == "Serbia" && a.Age == 27)
-				.OrderByDescending(a => a.BooksCount)
-				.Take(2)
-				.Select(a => new AuthorDTO_Optimized
-				{
-					FirstName = a.User.FirstName,
-					LastName = a.User.LastName,
-					UserName = a.User.UserName,
-					Email = a.User.Email,
-					Age = a.Age,
-					Country = a.Country,
-					Books = a.Books
-						.Where(b => b.Published.Year < 1900)
-						.Select(b => new BookDTO_Optimized
-						{
-							Title = b.Name,
-							Published = b.Published,
-							PublishedYear = b.Published.Year
-						})
-				})
-				.ToList();
-
-			return authors;
+			return CompiledQuery(dbContext).ToList();
 		}
+
+
+		private static readonly Func<AppDbContext, IEnumerable<AuthorDTO_Optimized>> CompiledQuery =
+		   EF.CompileQuery(
+			   (AppDbContext ctx) =>
+				   ctx.Authors
+				   .Where(a => a.Country == "Serbia" && a.Age == 27)
+				   .OrderByDescending(a => a.BooksCount)
+				   .Select(a => new AuthorDTO_Optimized
+				   {
+					   FirstName = a.User.FirstName,
+					   LastName = a.User.LastName,
+					   UserName = a.User.UserName,
+					   Email = a.User.Email,
+					   Age = a.Age,
+					   Country = a.Country,
+					   Books = a.Books
+						   .Where(b => b.Published.Year < 1900)
+						   .Select(b => new BookDTO_Optimized
+						   {
+							   Title = b.Name,
+							   Published = b.Published,
+							   PublishedYear = b.Published.Year
+						   })
+				   }).Take(2)
+			   );
 
 		//[Benchmark]
 		public List<AuthorDTO_OptimizedStruct> GetAuthors_Optimized_Struct()
