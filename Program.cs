@@ -24,9 +24,9 @@ namespace OptimizeMePlease
         static void Main(string[] args)
         {
             //Debugging 
-            //BenchmarkService benchmarkService = new BenchmarkService();
-            //var p = benchmarkService.GetAuthors_Optimized_Struct();
-            //var d = benchmarkService.GetAuthors_Optimized_Struct1();
+            BenchmarkService benchmarkService = new BenchmarkService();
+            // var d = benchmarkService.GetAuthors();
+            // var p = benchmarkService.GetAuthors_Optimized();
 
             //Comment me after first execution, please.
             //IWillPopulateData();

@@ -1,5 +1,9 @@
 # OptimizeMePlease
 
+# Docker Compose
+
+- Run `docker-compose up -d` to start the database
+
 ## You are probably here because you saw my post on Linkedin.
 ## Welcome!
 
