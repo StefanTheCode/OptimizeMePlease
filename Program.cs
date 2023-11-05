@@ -24,9 +24,9 @@ namespace OptimizeMePlease
         static void Main(string[] args)
         {
             //Debugging 
-            //BenchmarkService benchmarkService = new BenchmarkService();
-            //var p = benchmarkService.GetAuthors_Optimized_Struct();
-            //var d = benchmarkService.GetAuthors_Optimized_Struct1();
+            BenchmarkService benchmarkService = new BenchmarkService();
+            // var d = benchmarkService.GetAuthors();
+            // var p = benchmarkService.GetAuthors_Optimized();
 
             //Comment me after first execution, please.
             //IWillPopulateData();
@@ -36,7 +36,7 @@ namespace OptimizeMePlease
 
         public static void IWillPopulateData()
         {
-            string sqlConnectionString = @"Server=localhost;Database=OptimizeMePlease;Trusted_Connection=True;Integrated Security=true;MultipleActiveResultSets=true";
+            string sqlConnectionString = @"Server=localhost,1433;Database=OptimizeMePlease;TrustServerCertificate=True;User Id=sa;Password=test@123;MultipleActiveResultSets=true";
 
             string workingDirectory = Environment.CurrentDirectory;
             string path = Path.Combine(Directory.GetParent(workingDirectory).Parent.Parent.FullName, @"script.sql");

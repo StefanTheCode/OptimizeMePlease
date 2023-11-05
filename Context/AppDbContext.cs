@@ -9,7 +9,9 @@ namespace OptimizeMePlease.Context
     {
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            options.UseSqlServer("Server=localhost;Database=OptimizeMePlease;Trusted_Connection=True;Integrated Security=true;MultipleActiveResultSets=true");
+            options.UseSqlServer(
+                    "Server=localhost,1433;Database=OptimizeMePlease;TrustServerCertificate=True;User Id=sa;Password=test@123;MultipleActiveResultSets=true")
+                /*.LogTo(s => { Console.WriteLine(s); }, LogLevel.Information)*/;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

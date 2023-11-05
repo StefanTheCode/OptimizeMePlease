@@ -1,0 +1,16 @@
+﻿version: "3.9"
+
+services:
+  db:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    user: root
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "test@123"
+    volumes:
+      - db_vol:/var/opt/mssql/data
+    ports:
+      - "1433:1433"
+        
+volumes: 
+  db_vol: {}
